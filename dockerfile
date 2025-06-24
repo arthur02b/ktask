@@ -1,5 +1,6 @@
 FROM php:8.1-apache
 
+# Teste 2 - 
 # Instala dependências para compilar extensões
 RUN apt-get update && apt-get install -y \
     libpq-dev \
