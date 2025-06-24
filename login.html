@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ktask - Login</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #10274e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .logo {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .logo img {
+      max-width: 200px;
+    }
+
+    .login-container {
+      background-color: #fff;
+      color: #10274e;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      width: 300px;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      margin-bottom: 20px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 10px;
+      background-color: #10274e;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .login-container button:hover {
+      background-color: #25467f;
+    }
+
+    .login-container .signup-link {
+      margin-top: 15px;
+      display: block;
+      font-size: 0.9em;
+      color: #10274e;
+      text-decoration: none;
+    }
+
+    .login-container .signup-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="logo">
+    <img src="logo1.png" alt="Logo do Ktask">
+  </div>
+
+  <div class="login-container">
+    <h2>Entrar no Ktask</h2>
+    
+    <!-- FORMULÁRIO DE LOGIN -->
+    <form action="login.php" method="POST">
+      <input type="email" name="email" placeholder="Email" required>
+      <input type="password" name="senha" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+    </form>
+
+    <a href="cadastro.html" class="signup-link">Criar uma conta</a>
+  </div>
+</body>
+<script>
+  const form = document.querySelector('form');
+
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault(); // Impede o envio padrão
+
+    const formData = new FormData(form);
+    const response = await fetch('login.php', {
+      method: 'POST',
+      body: formData,
+      credentials: 'include' //  AQUIIIIIII 22/06
+
+    });
+
+    const resultado = await response.text();
+
+    if (resultado.trim() === 'login_sucesso') {
+      // salva nome no localStorage (opcional)
+      const nome = formData.get('email').split('@')[0];
+      localStorage.setItem('nomeUsuario', nome);
+
+      window.location.href = 'index.html'; // vai para a tela principal
+    } else {
+      alert('Email ou senha incorretos.');
+    }
+  });
+</script>
+
+</html>

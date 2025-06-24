@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ktask - Início</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #10274e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      background-color: #0d1d3a;
+      color: #0d1d3a;
+      padding: 20px;
+      text-align: center;
+    }
+
+    header img {
+      max-height: 100px;
+    }
+
+    .greeting {
+      text-align: left;
+      margin: 10px auto 0 auto;
+      width: 90%;
+      max-width: 1200px;
+      font-size: 1.2em;
+    }
+
+    .add-tarefa-container {
+      margin: 20px auto;
+      padding: 20px;
+      background-color: #0d1d3a;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .add-tarefa-container .mensagem-tarefas {
+      font-size: 1.1em;
+    }
+
+    .add-tarefa-container button {
+      padding: 8px 16px;
+      background-color: #d7d7d9;
+      color: #2c2276;
+      border: none;
+      border-radius: 5px;
+      font-size: 1em;
+      cursor: pointer;
+    }
+
+    .add-tarefa-container button:hover{
+        background-color: #10274e;
+        color: #fff;
+    }
+
+    main {
+      flex: 1;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      overflow-x: auto;
+    }
+
+    .coluna {
+      background-color: #f1f1f1;
+      color: #10274e;
+      border-radius: 10px;
+      padding: 15px;
+      min-width: 320px;
+      max-height: 80vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .coluna h3 {
+      text-align: center;
+    }
+
+    .tarefa {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      padding: 10px;
+      margin-bottom: 10px;
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    .tarefa:hover {
+      transform: scale(1.03);
+    }
+
+    .tarefa .nome {
+      font-weight: bold;
+    }
+
+    .tarefa .data {
+      font-size: 0.8em;
+      color: #666;
+    }
+
+    .prioridade-baixa { border-left: 5px solid green; }
+    .prioridade-media { border-left: 5px solid orange; }
+    .prioridade-alta { border-left: 5px solid red; }
+
+    .tarefa.concluida {
+      text-decoration: line-through;
+      opacity: 0.6;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal {
+      background-color: #fff;
+      color: #10274e;
+      padding: 20px;
+      border-radius: 10px;
+      width: 300px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .modal input,
+    .modal textarea,
+    .modal select,
+    .modal button {
+      padding: 8px;
+      border-radius: 5px;
+      font-size: 0.9em;
+    }
+
+    .modal button {
+      background-color: #2c2276;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    .move-buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .move-buttons button {
+      background-color: #2c2276;
+      color: #fff;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .visualizar-titulo {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 5px;
+    }
+
+    .visualizar-data {
+      font-size: 0.9em;
+      margin-bottom: 5px;
+    }
+
+    .visualizar-descricao {
+      font-size: 0.95em;
+    }
+
+    .visualizar-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85em;
+      color: #555;
+      margin-bottom: 5px;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #0d1d3a;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo1.png" alt="Logo do Ktask">
+    <button onclick="abrirPerfil()" style="position: absolute; right: 20px; top: 20px; background-color: #2c2276; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+        Perfil
+      </button>
+      
+  </header>
+  <br>
+  <div class="greeting">Olá, <span id="nomeUsuario">Usuário</span>! Seja bem-vindo(a) ao Ktask.</div>
+  <br>
+  <div class="add-tarefa-container">
+    <div class="mensagem-tarefas">Painel de tarefas</div>
+    <button onclick="abrirModal()">Adicionar Nova Tarefa</button>
+  </div>
+
+  <main>
+    <div class="coluna" id="a-fazer">
+      <h3>A Fazer</h3>
+      <div class="tarefas"></div>
+    </div>
+
+    <div class="coluna" id="em-andamento">
+      <h3>Em Andamento</h3>
+      <div class="tarefas"></div>
+    </div>
+
+    <div class="coluna" id="concluido">
+      <h3>Concluído</h3>
+      <div class="tarefas"></div>
+    </div>
+  </main>
+
+  <div class="overlay" id="overlay">
+    <div class="modal">
+      <input type="text" id="novaTarefaInput" placeholder="Nome da tarefa">
+      <textarea id="descricaoTarefa" placeholder="Descrição da tarefa"></textarea>
+      <input type="date" id="dataEntrega">
+      <select id="prioridadeSelect">
+        <option value="baixa">Baixa</option>
+        <option value="media">Média</option>
+        <option value="alta">Alta</option>
+      </select>
+      <button onclick="adicionarTarefa()">Salvar</button>
+      <button onclick="fecharModal()">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayVisualizar">
+    <div class="modal">
+      <div id="visualizarTitulo" class="visualizar-titulo"></div>
+      <div class="move-buttons">
+        <button onclick="moverTarefa(-1)" aria-label="Mover tarefa para a coluna anterior">&larr; Mover à esquerda</button>
+        <button onclick="moverTarefa(1)" aria-label="Mover tarefa para a próxima coluna">Mover à direita &rarr;</button>
+      </div>
+      <div id="visualizarData" class="visualizar-data"></div>
+      <div id="visualizarPrioridade" class="visualizar-data"></div>
+      <div id="visualizarDescricao" class="visualizar-descricao"></div><br>
+
+      <button id="editarBtn" onclick="editarTarefa()" aria-label="Editar tarefa">Editar</button>
+      <button onclick="excluirTarefa()" aria-label="Fechar visualização">Excluir</button>
+      <button onclick="fecharVisualizacao()" aria-label="Fechar visualização">Fechar</button>
+    </div>
+  </div>
+
+  <div class="overlay" id="overlayPerfil">
+    <div class="modal">
+      <h3>Informações do Usuário</h3>
+      <p><strong>Nome:</strong> <span id="perfilNomeUsuario">Usuário</span></p>
+      <p><strong>Email:</strong> <span id="perfilEmailUsuario">email@exemplo.com</span></p>
+      <p><strong>Usuário desde:</strong> <span id="perfilDataCadastro">01/01/2024</span></p>
+
+      <button onclick="fazerLogout()">Logout</button>
+      <button onclick="fecharPerfil()">Fechar</button>
+    </div>
+  </div>
+
+
+  <div class="overlay" id="overlayEditar">
+    <div class="modal">
+      <input type="text" id="editarTitulo" placeholder="Nome da tarefa">
+      <textarea id="editarDescricao" placeholder="Descrição da tarefa"></textarea>
+      <input type="date" id="editarData">
+      <select id="editarPrioridade">
+        <option value="baixa">Baixa</option>
+        <option value="media">Média</option>
+        <option value="alta">Alta</option>
+      </select>
+      <button onclick="salvarEdicao()">Salvar Alterações</button>
+      <button onclick="fecharModalEdicao()">Cancelar</button>
+    </div>
+  </div>
+  
+
+  <footer>
+    &copy; 2025 Ktask - Todos os direitos reservados
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+
+  fetch('listar_tarefas.php')
+  .then(res => res.json())
+  .then(tarefas => {
+    tarefas.forEach(tarefa => {
+      console.log(tarefa);
+      const tarefaEl = document.createElement('div');
+      
+      let prioridadeClasse = 'prioridade-baixa'; // padrão
+
+        if (tarefa.prioridade === 'alta') 
+        {
+          prioridadeClasse = 'prioridade-alta';
+        } 
+        
+        else if (tarefa.prioridade === 'media') 
+        {
+          prioridadeClasse = 'prioridade-media';
+        } 
+        
+        else if (tarefa.prioridade === 'baixa') 
+        {
+          prioridadeClasse = 'prioridade-baixa';
+        }
+
+      tarefaEl.className = `tarefa ${prioridadeClasse}`;
+      tarefaEl.dataset.id = tarefa.id;
+
+      const nomeEl = document.createElement('div');
+      nomeEl.className = 'nome';
+      nomeEl.textContent = tarefa.titulo;
+
+      const dataEl = document.createElement('div');
+      dataEl.className = 'data';
+      dataEl.textContent = tarefa.data_entrega ? `Entregar até: ${formatarData(tarefa.data_entrega)}` : '';
+
+      const descricaoEl = document.createElement('div');
+      descricaoEl.className = 'descricao';
+      descricaoEl.style.display = 'none';
+      descricaoEl.textContent = tarefa.descricao;
+
+      tarefaEl.appendChild(nomeEl);
+      tarefaEl.appendChild(dataEl);
+      tarefaEl.appendChild(descricaoEl);
+
+      tarefaEl.dataset.id = tarefa.id;
+      tarefaEl.classList.add("tarefa");
+      tarefaEl.addEventListener("click", () => {
+        document.querySelectorAll(".tarefa").forEach(t => t.removeAttribute("data-id-selecionado"));
+        tarefaEl.setAttribute("data-id-selecionado", "true");
+      });
+
+
+      /*
+      // Botão de editar
+      const editarBtn = document.createElement('a');
+      editarBtn.href = `editar_tarefa.php?id=${tarefa.id}`;
+      editarBtn.textContent = "Editar";
+      editarBtn.style.color = "#fff";
+      editarBtn.style.background = "#007bff";
+      editarBtn.style.padding = "6px 10px";
+      editarBtn.style.marginTop = "10px";
+      editarBtn.style.display = "inline-block";
+      editarBtn.style.borderRadius = "5px";
+      editarBtn.style.textDecoration = "none";
+      tarefaEl.appendChild(editarBtn);
+      */
+      tarefaEl.setAttribute('tabindex', '0');
+      tarefaEl.setAttribute('role', 'button');
+      tarefaEl.setAttribute('aria-label', `Tarefa: ${tarefa.titulo}`);
+      tarefaEl.addEventListener('click', () => abrirVisualizacao(tarefaEl));
+
+      const coluna = document.querySelector(`#${tarefa.status} .tarefas`);
+      if (coluna) {
+        coluna.appendChild(tarefaEl);
+      }
+    });
+  })
+  .catch(err => console.error('Erro ao carregar tarefas:', err));
+  
+
+  function excluirTarefa() {
+    if (!tarefaSelecionada) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Nenhuma tarefa selecionada para exclusão.'
+      });
+      return;
+    }
+    Swal.fire({
+      title: 'Tem certeza?',
+      text: "Você deseja realmente excluir esta tarefa?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sim, excluir'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const tarefaId = tarefaSelecionada.dataset.id;
+        const formData = new FormData();
+        formData.append('id', tarefaId);
+        fetch('excluir_tarefa.php', {
+          method: 'POST',
+          body: formData 
+        })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Erro na resposta do servidor');
+          }
+          return response.json();
+        })
+        
+        .then(data => {
+          console.log('Resposta do servidor:', data);
+          if (data.sucesso) {
+            tarefaSelecionada.remove(); 
+            fecharVisualizacao(); 
+            Swal.fire({
+              icon: 'success',
+              title: 'Excluída!',
+              text: 'A tarefa foi excluída com sucesso.'
+            });
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'Erro',
+              text: 'Erro ao excluir a tarefa: ' + (data.erro || 'Erro desconhecido')
+            });
+          }
+        })
+        .catch(error => {
+          console.error('Erro na requisição:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Erro de conexão ao excluir a tarefa.'
+          });
+        });
+      }
+    });
+  }
+  
+  
+  //
+  function abrirPerfil() 
+  {
+    fetch('dados_usuario.php')
+      .then(res => res.json())
+      .then(usuario => {
+        if (usuario.erro) {
+          Swal.fire('Erro', 'Não foi possível carregar os dados do usuário.', 'error');
+          return;
+        }
+
+        document.getElementById('perfilNomeUsuario').textContent = usuario.nome || 'Desconhecido';
+        document.getElementById('perfilEmailUsuario').textContent = usuario.email || 'Não informado';
+        
+        const dataFormatada = usuario.data_cadastro
+          ? new Date(usuario.data_cadastro).toLocaleDateString('pt-BR')
+          : 'Desconhecida';
+        document.getElementById('perfilDataCadastro').textContent = dataFormatada;
+
+        document.getElementById('overlayPerfil').style.display = 'flex';
+      })
+
+      .catch(() => {
+        Swal.fire('Erro', 'Erro ao buscar informações do perfil.', 'error');
+      });
+  }
+
+  
+  function fecharPerfil() 
+  {
+    document.getElementById('overlayPerfil').style.display = 'none';
+  }
+  
+  function fazerLogout() 
+  {
+    localStorage.removeItem('nomeUsuario');
+    window.location.href = 'login.html'; // redireciona para tela de login
+  }
+  
+  fetch('usuario_logado.php')
+  .then(res => res.json())
+  .then(() => 
+  {
+    const nomeUsuario = localStorage.getItem('nomeUsuario') || 'Usuário';
+    document.getElementById('nomeUsuario').textContent = nomeUsuario;
+    //document.getElementById('perfilNomeUsuario').textContent = nomeUsuario;
+  })
+  .catch(() => 
+  {
+    document.getElementById('nomeUsuario').textContent = 'Usuário';
+    //document.getElementById('perfilNomeUsuario').textContent = 'Usuário';
+  });
+
+
+  const colunas = ['a-fazer', 'em-andamento', 'concluido'];
+  let tarefaSelecionada = null;
+
+    function formatarData(dataStr) 
+    {
+      const [ano, mes, dia] = dataStr.split('-');
+      return `${dia}/${mes}/${ano}`;
+    }
+
+    function abrirModal() 
+    {
+      document.getElementById('overlay').style.display = 'flex';
+    }
+
+    function fecharModal() 
+    {
+      document.getElementById('overlay').style.display = 'none';
+    }
+
+    function abrirVisualizacao(tarefa) 
+    {
+      tarefaSelecionada = tarefa;
+      const nome = tarefa.querySelector('.nome').textContent;
+      const data = tarefa.querySelector('.data').textContent;
+      const descricao = tarefa.querySelector('.descricao').textContent;
+
+      let prioridade = 'Baixa'; // padrão
+        if (tarefa.classList.contains('prioridade-alta')) 
+        {
+          prioridade = 'Alta';
+        } 
+        else if (tarefa.classList.contains('prioridade-media')) 
+        {
+          prioridade = 'Média';
+        }
+
+      document.getElementById('visualizarTitulo').textContent = nome;
+      document.getElementById('visualizarData').textContent = data;
+      document.getElementById('visualizarPrioridade').textContent = `Prioridade: ${prioridade}`;
+      document.getElementById('visualizarDescricao').textContent = descricao;
+      document.getElementById('overlayVisualizar').style.display = 'flex';
+    }
+
+    function fecharVisualizacao() 
+    {
+      tarefaSelecionada = null;
+      document.getElementById('overlayVisualizar').style.display = 'none';
+    }
+
+    function moverTarefa(direcao) 
+    {
+      if (!tarefaSelecionada) return;
+    
+      const atual = colunas.findIndex(id => 
+      {
+        const colunaEl = document.getElementById(id).querySelector('.tarefas');
+        return colunaEl.contains(tarefaSelecionada);
+      });
+    
+      const novoIndice = atual + direcao;
+      if (novoIndice >= 0 && novoIndice < colunas.length) 
+      {
+        const novoStatus = colunas[novoIndice];
+        const tarefaId = tarefaSelecionada.dataset.id;
+    
+        // envia para o servidor
+        const formData = new FormData();
+        formData.append('id', tarefaId);
+        formData.append('status', novoStatus);
+    
+        fetch('atualizar_status.php', 
+        {
+          method: 'POST',
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          if (data.sucesso) 
+          {
+            document.getElementById(novoStatus).querySelector('.tarefas').appendChild(tarefaSelecionada);
+            fecharVisualizacao();
+          } 
+          else 
+          {
+            console.error('Erro ao atualizar status:', data.erro);
+            alert('Erro ao mover a tarefa.');
+          }
+        })
+        .catch(err => {
+          console.error('Erro na requisição:', err);
+          alert('Erro de conexão ao mover a tarefa.');
+        });
+      }
+    }
+    
+
+    function adicionarTarefa() {
+      const nome = document.getElementById('novaTarefaInput').value.trim();
+      const descricao = document.getElementById('descricaoTarefa').value.trim();
+      const data = document.getElementById('dataEntrega').value;
+      const prioridade = document.getElementById('prioridadeSelect').value;
+      
+      if (!nome) 
+      {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Campo obrigatório',
+          text: 'Por favor, insira o nome da tarefa.'
+        });
+        return;
+      }
+      const formData = new FormData();
+      formData.append('titulo', nome);
+      formData.append('descricao', descricao);
+      formData.append('data_entrega', data);
+      formData.append('prioridade', prioridade);
+      formData.append('status', 'a-fazer'); //  status
+      
+      fetch('salvar_tarefas.php', 
+      {
+        method: 'POST',
+        body: formData
+      })
+      
+      .then(res => res.text())
+      .then(resposta => 
+      {
+        console.log(resposta);
+        Swal.fire({
+          icon: 'success',
+          title: 'Tarefa adicionada!',
+          text: 'Sua tarefa foi salva com sucesso.'
+        })
+        .then(() => {
+          location.reload(); 
+        });
+      })
+      .catch(err => {
+        console.error('Erro ao salvar tarefa:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: 'Não foi possível salvar a tarefa.'
+        });
+    });
+
+    fecharModal();
+ 
+  }
+
+  function editarTarefa() {
+    if (!tarefaSelecionada) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Aviso',
+        text: 'Nenhuma tarefa selecionada.'
+      });
+      return;
+    }
+
+    const titulo = tarefaSelecionada.querySelector('.nome').textContent;
+    const descricao = tarefaSelecionada.querySelector('.descricao').textContent;
+    const dataTexto = tarefaSelecionada.querySelector('.data').textContent;
+    const data = dataTexto ? dataTexto.split('Entregar até: ')[1]?.split('/').reverse().join('-') : '';
+    
+    let prioridade = 'baixa';
+    if (tarefaSelecionada.classList.contains('prioridade-alta')) prioridade = 'alta';
+    else if (tarefaSelecionada.classList.contains('prioridade-media')) prioridade = 'media';
+
+    document.getElementById('editarTitulo').value = titulo;
+    document.getElementById('editarDescricao').value = descricao;
+    document.getElementById('editarData').value = data;
+    document.getElementById('editarPrioridade').value = prioridade;
+
+    document.getElementById('overlayEditar').style.display = 'flex';
+  }
+  
+  function fecharModalEdicao() {
+    document.getElementById('overlayEditar').style.display = 'none';
+  }
+  
+  function salvarEdicao() {
+    const id = tarefaSelecionada?.dataset.id;
+    if (!id) return;
+
+    const titulo = document.getElementById('editarTitulo').value.trim();
+    const descricao = document.getElementById('editarDescricao').value.trim();
+    const data = document.getElementById('editarData').value;
+    const prioridade = document.getElementById('editarPrioridade').value;
+
+    if (!titulo) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campo obrigatório',
+        text: 'Por favor, insira o nome da tarefa.'
+      });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('id', id);
+    formData.append('titulo', titulo);
+    formData.append('descricao', descricao);
+    formData.append('data_entrega', data);
+    formData.append('prioridade', prioridade);
+
+    fetch('editar_tarefa.php', {
+      method: 'POST',
+      body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.sucesso) {
+        Swal.fire({
+          icon: 'success',
+          title: 'Tarefa atualizada!',
+          text: 'As alterações foram salvas com sucesso.'
+        }).then(() => location.reload());
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erro',
+          text: data.erro || 'Erro ao salvar alterações.'
+        });
+      }
+    })
+    .catch(err => {
+      console.error('Erro ao salvar edição:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Erro de conexão ao editar a tarefa.'
+      });
+    });
+
+    fecharModalEdicao();
+  }
+
+
+
+
+
+  </script>
+</body>
+</html>
