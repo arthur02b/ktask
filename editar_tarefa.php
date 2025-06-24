@@ -1,10 +1,8 @@
 <?php
 header('Content-Type: application/json');
+require 'conexao.php'; // Conecta ao PostgreSQL via variáveis de ambiente
 
 try {
-    $pdo = new PDO("mysql:host=localhost;dbname=ktask", "root", "");
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
     if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $id = $_POST['id'] ?? null;
         $titulo = $_POST['titulo'] ?? '';
@@ -20,11 +18,7 @@ try {
         $stmt = $pdo->prepare("UPDATE tarefas SET titulo = ?, descricao = ?, data_entrega = ?, prioridade = ? WHERE id = ?");
         $success = $stmt->execute([$titulo, $descricao, $data_entrega, $prioridade, $id]);
 
-        if ($success) {
-            echo json_encode(['sucesso' => true]);
-        } else {
-            echo json_encode(['sucesso' => false, 'erro' => 'Erro ao atualizar tarefa.']);
-        }
+        echo json_encode(['sucesso' => $success]);
     } else {
         echo json_encode(['sucesso' => false, 'erro' => 'Método não permitido.']);
     }
