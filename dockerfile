@@ -1,25 +1,28 @@
 FROM php:8.1-apache
 
-# Instala o driver do PostgreSQL com todas as dependências
+# Instala dependências para compilar extensões
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    libedit-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    pkg-config \
+    build-essential \
     && docker-php-ext-install pdo_pgsql
 
-# Ativa mod_rewrite
+# Ativa o mod_rewrite do Apache
 RUN a2enmod rewrite
 
-# Elimina aviso de ServerName
+# Define ServerName para evitar warning
 RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# Copia os arquivos do projeto para a pasta do Apache
+# Copia os arquivos da aplicação
 COPY . /var/www/html/
 
-# Corrige permissões
+# Permissões
 RUN chown -R www-data:www-data /var/www/html
 
-# Exposição obrigatória para Render reconhecer o serviço
+# Expõe a porta 80 exigida pela Render
 EXPOSE 80
 
-# Mantém o Apache rodando em primeiro plano
 CMD ["apache2-foreground"]
